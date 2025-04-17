@@ -13,7 +13,8 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
 
-import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 
 @Slf4j
@@ -27,7 +28,7 @@ public class AutoFillAspect {
     }
 
     @Before("autoFillPointcut()")
-    public void autoFill(JoinPoint joinPoint) throws NoSuchFieldException, IllegalAccessException {
+    public void autoFill(JoinPoint joinPoint) throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         log.info("公共字段填充");
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         AutoFill autoFill = methodSignature.getMethod().getAnnotation(AutoFill.class);
@@ -39,23 +40,19 @@ public class AutoFillAspect {
         LocalDateTime now = LocalDateTime.now();
 
         Object entity = args[0];
-        Field updateUser = entity.getClass().getDeclaredField(AutoFillConstant.SET_UPDATE_USER);
-        Field updateTime = entity.getClass().getDeclaredField(AutoFillConstant.SET_UPDATE_TIME);
+        Method setUpdateUser = entity.getClass().getMethod(AutoFillConstant.SET_UPDATE_USER,Long.class);
+        Method setUpdateTime = entity.getClass().getMethod(AutoFillConstant.SET_UPDATE_TIME,LocalDateTime.class);
 
 
         if (autoFill.value().equals(OperationType.INSERT)) {
-            Field createUser = entity.getClass().getDeclaredField(AutoFillConstant.SET_CREATE_USER);
-            Field createTime = entity.getClass().getDeclaredField(AutoFillConstant.SET_CREATE_TIME);
-            createUser.setAccessible(true);
-            createUser.set(entity, id);
-            createTime.setAccessible(true);
-            createTime.set(entity, now);
+            Method setCreateUser = entity.getClass().getMethod(AutoFillConstant.SET_CREATE_USER,Long.class);
+            Method setCreateTime = entity.getClass().getMethod(AutoFillConstant.SET_CREATE_TIME,LocalDateTime.class);
+            setUpdateUser.invoke(entity, id);
+            setUpdateTime.invoke(entity, now);
+            setCreateUser.invoke(entity, id);
+            setCreateTime.invoke(entity, now);
         }
-        updateUser.setAccessible(true);
-        updateUser.set(entity, id);
-        updateTime.setAccessible(true);
-        updateTime.set(entity, now);
-
-
+        setUpdateUser.invoke(entity, id);
+        setUpdateTime.invoke(entity, now);
     }
 }
