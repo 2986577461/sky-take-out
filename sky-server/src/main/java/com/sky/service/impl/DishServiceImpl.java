@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -40,11 +41,11 @@ public class DishServiceImpl implements DishService {
         //插入一条菜品
         dishMapper.insert(dish);
         log.info("主键回显：{}", dish);
-        Long DishId = dish.getId();
+        Long dishId = dish.getId();
 
         List<DishFlavor> flavors = dishDTO.getFlavors();
         if (flavors != null && !flavors.isEmpty()) {
-            flavors.forEach(dishFlavor -> dishFlavor.setDishId(DishId));
+            flavors.forEach(dishFlavor -> dishFlavor.setDishId(dishId));
             dishFlavorMapper.insertBatsh(flavors);
         }
 
@@ -62,13 +63,38 @@ public class DishServiceImpl implements DishService {
     public void removes(List<Long> ids) {
         if (dishMapper.hasOpenStatus(ids))
             throw new DeletionNotAllowedException(MessageConstant.DISH_ON_SALE);
-        if(setMealDishMapper.isAssociated(ids))
+        if (setMealDishMapper.isAssociated(ids))
             throw new DeletionNotAllowedException(MessageConstant.DISH_BE_RELATED_BY_SETMEAL);
 
         dishMapper.deleteBatch(ids);
         dishFlavorMapper.deleteBatchByDishId(ids);
-
     }
 
+    @Override
+    public DishVO getDishWithFlavorById(Long id) {
+        Dish dish = dishMapper.selectById(id);
+        DishVO dishVO = new DishVO();
+        BeanUtils.copyProperties(dish, dishVO);
+        dishVO.setFlavors(dishFlavorMapper.getFlavorByDishId(id));
+        return dishVO;
+    }
 
+    @Override
+    @Transactional
+    public void updateDishWithFlavor(DishDTO dishDTO) {
+        Dish dish = new Dish();
+        BeanUtils.copyProperties(dishDTO, dish);
+
+        dishMapper.updateById(dish);
+
+        List<Long> id = new ArrayList<>();
+        id.add(dish.getId());
+        dishFlavorMapper.deleteBatchByDishId(id);
+
+        List<DishFlavor> flavors = dishDTO.getFlavors();
+        if (flavors != null && !flavors.isEmpty()) {
+            flavors.forEach(dishFlavor -> dishFlavor.setDishId(dish.getId()));
+            dishFlavorMapper.insertBatsh(flavors);
+        }
+    }
 }

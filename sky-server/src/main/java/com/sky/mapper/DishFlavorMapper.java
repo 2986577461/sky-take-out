@@ -13,4 +13,6 @@ public interface DishFlavorMapper {
     void insertBatsh(@Param("flavors") List<DishFlavor> flavors);
 
     void deleteBatchByDishId(@Param("dishIds")List<Long> dishIds);
+
+    List<DishFlavor> getFlavorByDishId(Long DishId);
 }

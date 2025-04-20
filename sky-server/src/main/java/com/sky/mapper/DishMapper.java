@@ -30,4 +30,9 @@ public interface DishMapper {
     boolean hasOpenStatus(@Param("ids") List<Long> ids);
 
     void deleteBatch(@Param("ids") List<Long> ids);
+
+    Dish selectById(Long id);
+
+    @AutoFill(OperationType.UPDATE)
+    void updateById(@Param("dish") Dish dish);
 }
