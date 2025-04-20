@@ -15,16 +15,16 @@
     <update id="update">
         UPDATE dish
         <set>
-            <if test="dish.name!=null">name = #{dish.name},</if>
-            <if test="dish.categoryId!=null">category_id = #{dish.categoryId},</if>
-            <if test="dish.price!=null">price=#{dish.price},</if>
-            <if test="dish.image!=null">image=#{dish.image},</if>
-            <if test="dish.description!=null">description=#{dish.description},</if>
-            <if test="dish.status!=null">status=#{dish.status},</if>
-            <if test="dish.updateTime!=null">update_time=#{dish.updateTime},</if>
-            <if test="dish.updateUser!=null">update_user=#{dish.updateUser},</if>
+            <if test="name!=null">name = #{name},</if>
+            <if test="categoryId!=null">category_id = #{categoryId},</if>
+            <if test="price!=null">price=#{price},</if>
+            <if test="image!=null">image=#{image},</if>
+            <if test="description!=null">description=#{description},</if>
+            <if test="status!=null">status=#{status},</if>
+            <if test="updateTime!=null">update_time=#{updateTime},</if>
+            <if test="updateUser!=null">update_user=#{updateUser},</if>
         </set>
-        WHERE id=#{dish.id}
+        WHERE id=#{id}
     </update>
     <delete id="deleteBatch">
         DELETE FROM dish WHERE id
@@ -38,30 +38,38 @@
         FROM dish t1
         LEFT JOIN category t2 ON t1.category_id = t2.id
         <where>
-            <if test="queryDTO.name != null">
-                AND t1.name LIKE CONCAT('%',#{queryDTO.name},'%')
+            <if test="name != null">
+                AND t1.name LIKE CONCAT('%',#{name},'%')
             </if>
-            <if test="queryDTO.categoryId!=null">
-                AND t1.category_id=#{queryDTO.categoryId}
+            <if test="categoryId!=null">
+                AND t1.category_id=#{categoryId}
             </if>
-            <if test="queryDTO.status!=null">
-                AND t1.status=#{queryDTO.status}
+            <if test="status!=null">
+                AND t1.status=#{status}
             </if>
         </where>
         ORDER BY t1.update_time DESC
-        LIMIT #{queryDTO.page},#{queryDTO.pageSize}
+        LIMIT #{page},#{pageSize}
     </select>
     <select id="hasOpenStatus" resultType="boolean">
         SELECT t1.status IS NOT NULL AND SUM(t1.status) > 0 FROM (
         SELECT status FROM dish WHERE
         id IN(<foreach collection="ids" item="id" separator=",">#{id}</foreach>)) t1
     </select>
-    <select id="selectById" resultType="com.sky.entity.Dish">
-        SELECT *
-        FROM dish
-        WHERE id = #{id}
+    <select id="select" resultType="Dish">
+        select * from dish
+        <where>
+            <if test="name != null">
+                and name like concat('%',#{name},'%')
+            </if>
+            <if test="categoryId != null">
+                and category_id = #{categoryId}
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+        </where>
+        order by create_time desc
     </select>
-    <select id="selectByCategoryId" resultType="com.sky.entity.Dish">
-        SELECT * FROM dish WHERE category_id=#{categoryId}
-    </select>
+
 </mapper>

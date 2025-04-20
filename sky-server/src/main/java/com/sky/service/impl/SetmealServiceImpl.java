@@ -2,11 +2,13 @@ package com.sky.service.impl;
 
 
 import com.sky.dto.SetmealDTO;
+import com.sky.dto.SetmealPageQueryDTO;
 import com.sky.entity.Setmeal;
 import com.sky.entity.SetmealDish;
 import com.sky.mapper.SetmealDishMapper;
 import com.sky.mapper.SetmealMapper;
 import com.sky.service.SetmealService;
+import com.sky.vo.SetmealVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -36,5 +38,11 @@ public class SetmealServiceImpl implements SetmealService {
                 setmealDish.setSetmealId(setmeal.getId()));
 
         setmealDishMapper.insertBatch(setmealDishes);
+    }
+
+    @Override
+    public List<SetmealVO> query(SetmealPageQueryDTO setmealPageQueryDTO) {
+        setmealPageQueryDTO.setPage(setmealPageQueryDTO.getPage()-1);
+        return setmealMapper.selectPage(setmealPageQueryDTO);
     }
 }

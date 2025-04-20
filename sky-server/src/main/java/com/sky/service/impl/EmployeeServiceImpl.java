@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-
 import java.util.List;
 import java.util.Objects;
 
@@ -28,11 +27,8 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     private static final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
-
     @Autowired
     private EmployeeMapper employeeMapper;
-
-
 
     public Employee login(EmployeeLoginDTO employeeLoginDTO) {
         String username = employeeLoginDTO.getUsername();
@@ -78,7 +74,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public PageResult Query(EmployeePageQueryDTO employeePageQueryDTO) {
+    public PageResult query(EmployeePageQueryDTO employeePageQueryDTO) {
         employeePageQueryDTO.setPage(employeePageQueryDTO.getPage() - 1);
         List<Employee> employeeMessage = employeeMapper.getPageByLikeName(employeePageQueryDTO);
         return new PageResult(employeeMessage.size(), employeeMessage);

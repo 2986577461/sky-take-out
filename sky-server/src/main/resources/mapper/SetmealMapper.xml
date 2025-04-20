@@ -13,4 +13,19 @@
                    #{setmeal.updateTime}, #{setmeal.createUser},
                    #{setmeal.updateUser})
     </insert>
+    <select id="selectPage" resultType="com.sky.vo.SetmealVO">
+        SELECT * FROM setmeal
+        <where>
+            <if test="name!=null">
+                AND name LIKE CONCAT('%',#{name},'%')
+            </if>
+            <if test="categoryId!=null">
+                AND category_id=#{categoryId}
+            </if>
+            <if test="status!=null">
+                AND status=#{status}
+            </if>
+        </where>
+        LIMIT #{page},#{pageSize}
+    </select>
 </mapper>

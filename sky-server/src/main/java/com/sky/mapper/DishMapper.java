@@ -6,7 +6,6 @@ import com.sky.entity.Dish;
 import com.sky.enumeration.OperationType;
 import com.sky.vo.DishVO;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
@@ -25,16 +24,15 @@ public interface DishMapper {
     @AutoFill(OperationType.INSERT)
     void insert(Dish dish);
 
-    List<DishVO> selectPage(@Param("queryDTO") DishPageQueryDTO queryDTO);
+    List<DishVO> selectPage( DishPageQueryDTO queryDTO);
 
-    boolean hasOpenStatus(@Param("ids") List<Long> ids);
+    boolean hasOpenStatus( List<Long> ids);
 
-    void deleteBatch(@Param("ids") List<Long> ids);
+    void deleteBatch( List<Long> ids);
 
-    Dish selectById(Long id);
+    List<Dish> select( Dish dish);
 
     @AutoFill(OperationType.UPDATE)
-    void update(@Param("dish") Dish dish);
+    void update( Dish dish);
 
-    List<Dish> selectByCategoryId(Long categoryId);
 }

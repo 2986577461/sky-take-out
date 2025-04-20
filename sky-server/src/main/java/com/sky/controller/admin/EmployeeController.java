@@ -83,9 +83,9 @@ public class EmployeeController {
      * @return
      */
     @GetMapping("page")
-    public Result<PageResult> Query(EmployeePageQueryDTO employeePageQueryDTO) {
+    public Result<PageResult> query(EmployeePageQueryDTO employeePageQueryDTO) {
         log.info("分页查询,参数为：{}", employeePageQueryDTO);
-        PageResult pageResult = employeeService.Query(employeePageQueryDTO);
+        PageResult pageResult = employeeService.query(employeePageQueryDTO);
         return Result.success(pageResult);
     }
 

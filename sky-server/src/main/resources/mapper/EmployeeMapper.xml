@@ -11,11 +11,11 @@
     <select id="getPageByLikeName" resultType="com.sky.entity.Employee">
         SELECT * FROM employee
         <where>
-            <if test="employee.name!=null">
-                name LIKE CONCAT('%',#{employee.name},'%')
+            <if test="name!=null">
+               AND name LIKE CONCAT('%',#{name},'%')
             </if>
         </where>
-        LIMIT #{employee.page},#{employee.pageSize}
+        LIMIT #{page},#{pageSize}
     </select>
 
 

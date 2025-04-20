@@ -6,7 +6,6 @@ import com.sky.dto.EmployeePageQueryDTO;
 import com.sky.entity.Employee;
 import com.sky.enumeration.OperationType;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
@@ -26,7 +25,7 @@ public interface EmployeeMapper {
     @AutoFill(OperationType.INSERT)
     int insert(Employee employee);
 
-    List<Employee> getPageByLikeName(@Param("employee") EmployeePageQueryDTO employeePageQueryDTO);
+    List<Employee> getPageByLikeName( EmployeePageQueryDTO employeePageQueryDTO);
 
     @AutoFill(OperationType.UPDATE)
     void updateEmployee(Employee employee);

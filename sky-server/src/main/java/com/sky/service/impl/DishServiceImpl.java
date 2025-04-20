@@ -72,7 +72,7 @@ public class DishServiceImpl implements DishService {
 
     @Override
     public DishVO getDishWithFlavorById(Long id) {
-        Dish dish = dishMapper.selectById(id);
+        Dish dish = dishMapper.select(Dish.builder().id(id).build()).get(0);
         DishVO dishVO = new DishVO();
         BeanUtils.copyProperties(dish, dishVO);
         dishVO.setFlavors(dishFlavorMapper.getFlavorByDishId(id));
@@ -105,6 +105,7 @@ public class DishServiceImpl implements DishService {
 
     @Override
     public List<Dish> getList(Long categoryId) {
-        return dishMapper.selectByCategoryId(categoryId);
+
+        return dishMapper.select(Dish.builder().categoryId(categoryId).build());
     }
 }

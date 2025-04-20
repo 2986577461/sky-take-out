@@ -18,7 +18,7 @@ public interface EmployeeService {
 
     Result<String > addEmployees(EmployeeDTO employeeDTO);
 
-    PageResult Query(EmployeePageQueryDTO employeePageQueryDTO);
+    PageResult query(EmployeePageQueryDTO employeePageQueryDTO);
 
     void startOrStop(Integer status, Long id);
 
