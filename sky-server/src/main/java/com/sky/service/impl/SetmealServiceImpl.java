@@ -21,6 +21,7 @@ public class SetmealServiceImpl implements SetmealService {
 
     private final SetmealDishMapper setmealDishMapper;
 
+
     public SetmealServiceImpl(SetmealMapper setmealMapper, SetmealDishMapper setmealDishMapper) {
         this.setmealMapper = setmealMapper;
         this.setmealDishMapper = setmealDishMapper;
@@ -30,7 +31,7 @@ public class SetmealServiceImpl implements SetmealService {
     public void addSetmeal(SetmealDTO setmealDTO) {
         Setmeal setmeal = new Setmeal();
         BeanUtils.copyProperties(setmealDTO, setmeal);
-        this.setmealMapper.inset(setmeal);
+        setmealMapper.inset(setmeal);
 
 
         List<SetmealDish> setmealDishes = setmealDTO.getSetmealDishes();
@@ -42,7 +43,9 @@ public class SetmealServiceImpl implements SetmealService {
 
     @Override
     public List<SetmealVO> query(SetmealPageQueryDTO setmealPageQueryDTO) {
-        setmealPageQueryDTO.setPage(setmealPageQueryDTO.getPage()-1);
+
+        setmealPageQueryDTO.setPage(setmealPageQueryDTO.getPage() - 1);
+
         return setmealMapper.selectPage(setmealPageQueryDTO);
     }
 }

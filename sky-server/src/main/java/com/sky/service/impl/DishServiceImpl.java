@@ -2,6 +2,7 @@ package com.sky.service.impl;
 
 
 import com.sky.constant.MessageConstant;
+import com.sky.constant.StatusConstant;
 import com.sky.dto.DishDTO;
 import com.sky.dto.DishPageQueryDTO;
 import com.sky.entity.Dish;
@@ -105,7 +106,10 @@ public class DishServiceImpl implements DishService {
 
     @Override
     public List<Dish> getList(Long categoryId) {
-
-        return dishMapper.select(Dish.builder().categoryId(categoryId).build());
+        return dishMapper.select(
+                Dish.builder().
+                        categoryId(categoryId).
+                        status(StatusConstant.ENABLE).
+                        build());
     }
 }

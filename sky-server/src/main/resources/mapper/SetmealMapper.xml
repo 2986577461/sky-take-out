@@ -7,23 +7,24 @@
     <insert id="inset" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO setmeal(category_id, name, price, description,
                             image, create_time, update_time, create_user, update_user)
-            VALUE (#{setmeal.categoryId}, #{setmeal.name},
-                   #{setmeal.price}, #{setmeal.description},
-                   #{setmeal.image}, #{setmeal.createTime},
-                   #{setmeal.updateTime}, #{setmeal.createUser},
-                   #{setmeal.updateUser})
+            VALUE (#{categoryId}, #{name},
+                   #{price}, #{description},
+                   #{image}, #{createTime},
+                   #{updateTime}, #{createUser},
+                   #{updateUser})
     </insert>
     <select id="selectPage" resultType="com.sky.vo.SetmealVO">
-        SELECT * FROM setmeal
+        SELECT t1.*,t2.name categoryName FROM setmeal t1 LEFT JOIN category t2
+        ON t1.category_id = t2.id
         <where>
             <if test="name!=null">
-                AND name LIKE CONCAT('%',#{name},'%')
+                AND t1.name LIKE CONCAT('%',#{name},'%')
             </if>
             <if test="categoryId!=null">
-                AND category_id=#{categoryId}
+                AND t1.category_id=#{categoryId}
             </if>
             <if test="status!=null">
-                AND status=#{status}
+                AND t1.status=#{status}
             </if>
         </where>
         LIMIT #{page},#{pageSize}
