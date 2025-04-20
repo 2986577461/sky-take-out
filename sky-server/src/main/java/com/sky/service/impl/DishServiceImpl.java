@@ -9,7 +9,7 @@ import com.sky.entity.DishFlavor;
 import com.sky.exception.DeletionNotAllowedException;
 import com.sky.mapper.DishFlavorMapper;
 import com.sky.mapper.DishMapper;
-import com.sky.mapper.SetMealDishMapper;
+import com.sky.mapper.SetmealDishMapper;
 import com.sky.result.PageResult;
 import com.sky.service.DishService;
 import com.sky.vo.DishVO;
@@ -31,7 +31,7 @@ public class DishServiceImpl implements DishService {
     @Autowired
     private DishFlavorMapper dishFlavorMapper;
     @Autowired
-    private SetMealDishMapper setMealDishMapper;
+    private SetmealDishMapper setMealDishMapper;
 
     @Override
     @Transactional
@@ -85,7 +85,7 @@ public class DishServiceImpl implements DishService {
         Dish dish = new Dish();
         BeanUtils.copyProperties(dishDTO, dish);
 
-        dishMapper.updateById(dish);
+        dishMapper.update(dish);
 
         List<Long> id = new ArrayList<>();
         id.add(dish.getId());
@@ -96,5 +96,15 @@ public class DishServiceImpl implements DishService {
             flavors.forEach(dishFlavor -> dishFlavor.setDishId(dish.getId()));
             dishFlavorMapper.insertBatsh(flavors);
         }
+    }
+
+    @Override
+    public void switchStatus(Long id, Integer status) {
+        dishMapper.update(Dish.builder().id(id).status(status).build());
+    }
+
+    @Override
+    public List<Dish> getList(Long categoryId) {
+        return dishMapper.selectByCategoryId(categoryId);
     }
 }

@@ -34,5 +34,7 @@ public interface DishMapper {
     Dish selectById(Long id);
 
     @AutoFill(OperationType.UPDATE)
-    void updateById(@Param("dish") Dish dish);
+    void update(@Param("dish") Dish dish);
+
+    List<Dish> selectByCategoryId(Long categoryId);
 }

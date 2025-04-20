@@ -12,7 +12,7 @@
             VALUE (#{name}, #{categoryId}, #{price}, #{image}, #{description},
                    #{createTime}, #{updateTime}, #{createUser}, #{updateUser}, #{status})
     </insert>
-    <update id="updateById">
+    <update id="update">
         UPDATE dish
         <set>
             <if test="dish.name!=null">name = #{dish.name},</if>
@@ -60,5 +60,8 @@
         SELECT *
         FROM dish
         WHERE id = #{id}
+    </select>
+    <select id="selectByCategoryId" resultType="com.sky.entity.Dish">
+        SELECT * FROM dish WHERE category_id=#{categoryId}
     </select>
 </mapper>
