@@ -11,6 +11,10 @@
             VALUE (#{name}, #{categoryId}, #{price}, #{image}, #{description},
                    #{createTime}, #{updateTime}, #{createUser}, #{updateUser}, #{status})
     </insert>
+    <delete id="deleteBatch">
+        DELETE FROM dish WHERE id
+        IN (<foreach collection="ids" item="id" separator=",">#{id}</foreach>)
+    </delete>
 
     <select id="selectPage" resultType="com.sky.vo.DishVO">
         SELECT
@@ -20,7 +24,7 @@
         LEFT JOIN category t2 ON t1.category_id = t2.id
         <where>
             <if test="queryDTO.name != null">
-               AND t1.name LIKE CONCAT('%',#{queryDTO.name},'%')
+                AND t1.name LIKE CONCAT('%',#{queryDTO.name},'%')
             </if>
             <if test="queryDTO.categoryId!=null">
                 AND t1.category_id=#{queryDTO.categoryId}
@@ -31,5 +35,10 @@
         </where>
         ORDER BY t1.update_time DESC
         LIMIT #{queryDTO.page},#{queryDTO.pageSize}
+    </select>
+    <select id="hasOpenStatus" resultType="boolean">
+        SELECT t1.status IS NOT NULL AND SUM(t1.status) > 0 FROM (
+        SELECT status FROM dish WHERE
+        id IN(<foreach collection="ids" item="id" separator=",">#{id}</foreach>)) t1
     </select>
 </mapper>

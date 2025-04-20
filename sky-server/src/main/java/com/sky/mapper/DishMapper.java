@@ -26,4 +26,8 @@ public interface DishMapper {
     void insert(Dish dish);
 
     List<DishVO> selectPage(@Param("queryDTO") DishPageQueryDTO queryDTO);
+
+    boolean hasOpenStatus(@Param("ids") List<Long> ids);
+
+    void deleteBatch(@Param("ids") List<Long> ids);
 }

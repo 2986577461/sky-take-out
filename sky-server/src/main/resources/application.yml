@@ -12,6 +12,14 @@ spring:
       url: jdbc:mysql://${sky.datasource.host}:${sky.datasource.port}/${sky.datasource.database}?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
       username: ${sky.datasource.username}
       password: ${sky.datasource.password}
+      # 连接空闲超时时间（单位：毫秒，默认 30 分钟）
+      min-evictable-idle-time-millis: 1800000  # 30 分钟
+      # 检测空闲连接的间隔（单位：毫秒）
+      time-between-eviction-runs-millis: 60000  # 60 秒
+      # 是否检测空闲连接的有效性
+      test-while-idle: true
+      # 检测连接是否有效的 SQL（MySQL 可用 SELECT 1）
+      validation-query: SELECT 1
   servlet:
     multipart:
           max-file-size: 10MB      # 单个文件最大大小

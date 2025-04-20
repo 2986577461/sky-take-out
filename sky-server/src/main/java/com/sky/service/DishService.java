@@ -4,8 +4,13 @@ import com.sky.dto.DishDTO;
 import com.sky.dto.DishPageQueryDTO;
 import com.sky.result.PageResult;
 
+import java.util.List;
+
 public interface DishService {
     void saveWithFlavor(DishDTO dishDTO);
 
     PageResult getPage(DishPageQueryDTO queryDTO);
+
+
+    void removes(List<Long> ids);
 }
