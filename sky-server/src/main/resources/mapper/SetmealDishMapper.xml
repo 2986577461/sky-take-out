@@ -11,8 +11,21 @@
         </foreach>
     </insert>
 
+    <delete id="deleteBatchBySetmealId">
+        DELETE FROM setmeal_dish WHERE setmeal_id
+        IN (
+        <foreach collection="setmealIds" separator="," item="setmealId">
+            #{setmealId}
+        </foreach>)
+    </delete>
+
     <select id="isAssociated" resultType="java.lang.Boolean">
         SELECT COUNT(1)>0 FROM setmeal_dish WHERE dish_id
         IN (<foreach collection="dishIds" item="dishId" separator=",">#{dishId}</foreach>)
+    </select>
+    <select id="selectBySetmealId" resultType="com.sky.entity.SetmealDish">
+        SELECT *
+        FROM setmeal_dish
+        WHERE setmeal_id = #{setmealId}
     </select>
 </mapper>

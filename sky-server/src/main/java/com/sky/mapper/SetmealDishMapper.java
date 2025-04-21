@@ -11,4 +11,8 @@ public interface SetmealDishMapper {
     boolean isAssociated(List<Long> dishIds);
 
     void insertBatch(List<SetmealDish> setmealDishes);
+
+    List<SetmealDish> selectBySetmealId(Long setmealId);
+
+    void deleteBatchBySetmealId(List<Long> setmealIds);
 }

@@ -13,6 +13,24 @@
                    #{updateTime}, #{createUser},
                    #{updateUser})
     </insert>
+    <update id="update">
+        UPDATE setmeal
+        <set>
+            <if test="categoryId != null">category_id = #{categoryId},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="price != null">price = #{price},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="image != null">image = #{image},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="updateUser !=null">update_user=#{updateUser},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+    <delete id="deleteBatch">
+        DELETE FROM setmeal WHERE id
+        IN (<foreach collection="ids" item="id" separator=",">#{id}</foreach>)
+    </delete>
     <select id="selectPage" resultType="com.sky.vo.SetmealVO">
         SELECT t1.*,t2.name categoryName FROM setmeal t1 LEFT JOIN category t2
         ON t1.category_id = t2.id
@@ -27,6 +45,13 @@
                 AND t1.status=#{status}
             </if>
         </where>
+        ORDER BY t1.create_time DESC
         LIMIT #{page},#{pageSize}
+
+    </select>
+    <select id="selectById" resultType="com.sky.vo.SetmealVO">
+        SELECT *
+        FROM setmeal
+        WHERE id = #{id}
     </select>
 </mapper>

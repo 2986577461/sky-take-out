@@ -37,5 +37,25 @@ public class SetmealController {
         return Result.success(new PageResult(list.size(), list));
     }
 
+    @GetMapping("{id}")
+    public Result<SetmealVO> getSetmealById(@PathVariable Long id) {
+        log.info("套餐回显：{}", id);
+        return Result.success(setmealService.getSetmealById(id));
+    }
+
+    @DeleteMapping
+    public Result<String> delete(@RequestParam List<Long> ids) {
+        log.info("删除套餐：{}", ids);
+        setmealService.delete(ids);
+        return Result.success();
+    }
+
+    @PutMapping
+    public Result<String> update(@RequestBody SetmealDTO setmealDTO) {
+        log.info("修改套餐：{}", setmealDTO);
+        setmealService.update(setmealDTO);
+        return Result.success();
+    }
+
 
 }

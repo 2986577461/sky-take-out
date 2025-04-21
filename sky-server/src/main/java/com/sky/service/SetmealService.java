@@ -10,4 +10,10 @@ public interface SetmealService {
     void addSetmeal(SetmealDTO setmealDTO);
 
     List<SetmealVO> query(SetmealPageQueryDTO setmealPageQueryDTO);
+
+    void delete(List<Long> ids);
+
+    SetmealVO getSetmealById(Long id);
+
+    void update(SetmealDTO setmealDTO);
 }

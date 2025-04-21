@@ -25,4 +25,11 @@ public interface SetmealMapper {
     void inset( Setmeal setmeal);
 
     List<SetmealVO> selectPage( SetmealPageQueryDTO setmealPageQueryDTO);
+
+    void deleteBatch(List<Long> ids);
+
+    SetmealVO selectById(Long id);
+
+    @AutoFill(OperationType.UPDATE)
+    void update(Setmeal setmeal);
 }

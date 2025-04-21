@@ -1,10 +1,13 @@
 package com.sky.service.impl;
 
 
+import com.sky.constant.MessageConstant;
+import com.sky.constant.StatusConstant;
 import com.sky.dto.SetmealDTO;
 import com.sky.dto.SetmealPageQueryDTO;
 import com.sky.entity.Setmeal;
 import com.sky.entity.SetmealDish;
+import com.sky.exception.DeletionNotAllowedException;
 import com.sky.mapper.SetmealDishMapper;
 import com.sky.mapper.SetmealMapper;
 import com.sky.service.SetmealService;
@@ -12,7 +15,9 @@ import com.sky.vo.SetmealVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class SetmealServiceImpl implements SetmealService {
@@ -47,5 +52,39 @@ public class SetmealServiceImpl implements SetmealService {
         setmealPageQueryDTO.setPage(setmealPageQueryDTO.getPage() - 1);
 
         return setmealMapper.selectPage(setmealPageQueryDTO);
+    }
+
+    @Override
+    public void delete(List<Long> ids) {
+        ids.forEach(aLong ->
+        {
+            if (Objects.equals(setmealMapper.selectById(aLong).getStatus(), StatusConstant.ENABLE))
+                throw new DeletionNotAllowedException(MessageConstant.SETMEAL_ON_SALE);
+        });
+        setmealDishMapper.deleteBatchBySetmealId(ids);
+        setmealMapper.deleteBatch(ids);
+    }
+
+    @Override
+    public SetmealVO getSetmealById(Long id) {
+        SetmealVO setmealVO = setmealMapper.selectById(id);
+        setmealVO.setSetmealDishes(setmealDishMapper.selectBySetmealId(id));
+        return setmealVO;
+    }
+
+    @Override
+    public void update(SetmealDTO setmealDTO) {
+        Setmeal setmeal = new Setmeal();
+        BeanUtils.copyProperties(setmealDTO, setmeal);
+        setmealMapper.update(setmeal);
+
+
+        ArrayList<Long> list = new ArrayList<>();
+        list.add(setmeal.getId());
+        setmealDishMapper.deleteBatchBySetmealId(list);
+
+        List<SetmealDish> setmealDishes = setmealDTO.getSetmealDishes();
+        setmealDishes.forEach(setmealDish -> setmealDish.setSetmealId(setmeal.getId()));
+        setmealDishMapper.insertBatch(setmealDishes);
     }
 }
