@@ -13,7 +13,6 @@ public interface DishService {
 
     PageResult getPage(DishPageQueryDTO queryDTO);
 
-
     void removes(List<Long> ids);
 
     DishVO getDishWithFlavorById(Long id);
@@ -23,4 +22,6 @@ public interface DishService {
     void switchStatus(Long id, Integer status);
 
     List<Dish> getList(Long categoryId);
+
+    List<DishVO> listWithFlavor(Dish dish);
 }
