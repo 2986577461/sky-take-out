@@ -42,6 +42,7 @@ public class DishController {
     public Result<DishVO> getDishById(@PathVariable Long id) {
         log.info("菜品回显:{}", id);
         return Result.success(dishService.getDishWithFlavorById(id));
+
     }
 
     @GetMapping("list")
@@ -63,7 +64,6 @@ public class DishController {
         log.info("修改菜品:{}", dishDTO);
         dishService.updateDishWithFlavor(dishDTO);
         cleanCache("dish_*");
-
         return Result.success();
     }
 

@@ -30,9 +30,12 @@ public interface DishMapper {
 
     void deleteBatch( List<Long> ids);
 
-    List<Dish> select( Dish dish);
 
     @AutoFill(OperationType.UPDATE)
     void update( Dish dish);
 
+    List<Dish> select(Dish dish);
+
+    @Select("SELECT * FROM dish WHERE id=#{id}")
+    Dish selectById(Long id);
 }
