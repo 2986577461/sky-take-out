@@ -37,7 +37,6 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         if (list != null && !list.isEmpty()) {
             Integer number = list.get(0).getNumber() + 1;
             list.get(0).setNumber(number);
-
             shoppingCartMapper.update(list.get(0));
         } else {
             if (shoppingCart.getDishId() == null) {
@@ -60,8 +59,34 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     @Override
     public List<ShoppingCart> list() {
-       return shoppingCartMapper.list(ShoppingCart.builder()
-                .id(BaseContext.getCurrentId())
+        return shoppingCartMapper.list(ShoppingCart.builder()
+                .userId(BaseContext.getCurrentId())
                 .build());
+    }
+
+    @Override
+    public void clean() {
+        shoppingCartMapper.delete(
+                ShoppingCart.builder()
+                        .userId(BaseContext.getCurrentId())
+                        .build());
+    }
+
+    @Override
+    public void sub(ShoppingCartDTO shoppingCartDTO) {
+        ShoppingCart shoppingCart = new ShoppingCart();
+        BeanUtils.copyProperties(shoppingCartDTO, shoppingCart);
+        shoppingCart.setUserId(BaseContext.getCurrentId());
+
+        ShoppingCart shoppingCart1 = shoppingCartMapper.list(shoppingCart).get(0);
+
+        //如果item不足两条则直接删除，不展示在购物车
+        if (shoppingCart1.getNumber() <= 1) {
+            shoppingCartMapper.delete(shoppingCart);
+        } else {
+            //大于两条只减少数量即可
+            shoppingCart.setNumber(shoppingCart1.getNumber() - 1);
+            shoppingCartMapper.update(shoppingCart);
+        }
     }
 }
