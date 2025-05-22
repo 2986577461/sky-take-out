@@ -12,6 +12,7 @@ import com.sky.vo.OrderVO;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -46,5 +47,26 @@ public class OrderController {
         List<OrderVO> orderVO = orderService.historyOrders(page, pageSize,status);
         return Result.success(new PageResult(orderVO.size(),orderVO));
     }
+
+    @GetMapping("orderDetail/{id}")
+    public Result<OrderVO> orderDetail(@PathVariable Long id){
+        log.info("订单详情：{}",id);
+        return Result.success(orderService.orderDetail(id));
+    }
+
+    @PutMapping("cancel/{id}")
+    public Result<String> cancel(@PathVariable Long id){
+        log.info("取消订单：{}",id);
+        orderService.cancel(id);
+        return Result.success();
+    }
+
+    @PostMapping("repetition/{id}")
+    public Result<String>repetition(@PathVariable Long id){
+        log.info("再来一单：{}",id);
+        orderService.repetition(id);
+        return Result.success();
+    }
+
 
 }

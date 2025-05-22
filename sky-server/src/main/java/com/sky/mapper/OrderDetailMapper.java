@@ -12,5 +12,5 @@ public interface OrderDetailMapper {
     void insert(List<OrderDetail> orderDetails);
 
     @Select( "select * from order_detail where order_id = #{orderId}")
-    List<OrderDetail> getByOrderId(Long id);
+    List<OrderDetail> getByOrderId(Long orderId);
 }

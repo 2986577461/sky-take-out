@@ -20,4 +20,10 @@ public interface OrderService {
     void paySuccess(String outTradeNo);
 
     List<OrderVO> historyOrders(Integer page, Integer pageSize, Integer status);
+
+    OrderVO orderDetail(Long id);
+
+    void cancel(Long id);
+
+    void repetition(Long id);
 }

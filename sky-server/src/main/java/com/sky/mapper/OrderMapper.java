@@ -24,4 +24,7 @@ public interface OrderMapper {
     Orders getByNumberAndUserId(String orderNumber, Long userId);
 
     List<Orders> query(@Param("ordersDTO") OrdersDTO ordersDTO, @Param("page") Integer page, @Param("pageSize") Integer pageSize);
+
+    @Select("SELECT * FROM orders WHERE id=#{id}")
+    Orders getById(Long id);
 }

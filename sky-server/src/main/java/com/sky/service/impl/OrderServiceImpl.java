@@ -12,6 +12,7 @@ import com.sky.entity.Orders;
 import com.sky.entity.ShoppingCart;
 import com.sky.entity.User;
 import com.sky.exception.AddressBookBusinessException;
+import com.sky.exception.OrderBusinessException;
 import com.sky.exception.ShoppingCartBusinessException;
 import com.sky.mapper.AddressBookMapper;
 import com.sky.mapper.OrderDetailMapper;
@@ -31,6 +32,10 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
+import static com.sky.entity.Orders.CANCELLED;
+import static com.sky.entity.Orders.DELIVERY_IN_PROGRESS;
 
 
 @Service
@@ -68,7 +73,7 @@ public class OrderServiceImpl implements OrderService {
 
         Orders orders = new Orders();
         BeanUtils.copyProperties(ordersSubmitDTO, orders);
-
+        orders.setAddress(addressBook.getDetail());
         orders.setOrderTime(LocalDateTime.now());
         orders.setNumber(UUID.randomUUID().toString());
         orders.setPhone(addressBook.getPhone());
@@ -76,7 +81,6 @@ public class OrderServiceImpl implements OrderService {
         orders.setStatus(Orders.PENDING_PAYMENT);
         orders.setConsignee(addressBook.getConsignee());
         orders.setUserId(userId);
-
         orderMapper.insert(orders);
 
         ArrayList<OrderDetail> orderDetails = new ArrayList<>();
@@ -175,6 +179,7 @@ public class OrderServiceImpl implements OrderService {
         Long id = BaseContext.getCurrentId();
         OrdersDTO ordersDTO = new OrdersDTO();
         ordersDTO.setUserId(id);
+        ordersDTO.setStatus(status);
         List<Orders> list = orderMapper.query(ordersDTO, page - 1, pageSize);
 
         List<OrderVO> orderVOS = new ArrayList<>();
@@ -188,6 +193,65 @@ public class OrderServiceImpl implements OrderService {
 
         return orderVOS;
 
+    }
+
+    @Override
+    public OrderVO orderDetail(Long id) {
+        Orders orders = orderMapper.getById(id);
+
+        if (orders == null)
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+
+        OrderVO orderVO = new OrderVO();
+        BeanUtils.copyProperties(orders, orderVO);
+        orderVO.setOrderDetailList(orderDetailMapper.getByOrderId(id));
+
+        return orderVO;
+    }
+
+    @Override
+    public void cancel(Long id) {
+        Orders order = orderMapper.getById(id);
+
+        if (order == null)
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+
+        if (!BaseContext.getCurrentId().equals(order.getUserId()))
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+
+        if (order.getStatus() > DELIVERY_IN_PROGRESS) {
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+
+        Orders order1 = new Orders();
+
+        if (order.getPayStatus().equals(Orders.PAID)) {
+            order1.setPayStatus(Orders.REFUND);
+        }
+        order1.setId(id);
+        order1.setCancelReason("用户取消");
+        order1.setCancelTime(LocalDateTime.now());
+        order1.setStatus(CANCELLED);
+        orderMapper.update(order1);
+    }
+
+    @Override
+    public void repetition(Long id) {
+        Orders order = orderMapper.getById(id);
+        if (order == null)
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+
+        List<OrderDetail> dishes = orderDetailMapper.getByOrderId(id);
+
+        List<ShoppingCart> list = dishes.stream().map(orderDetail -> {
+            ShoppingCart shoppingCart = new ShoppingCart();
+            BeanUtils.copyProperties(orderDetail, shoppingCart, "id");
+            shoppingCart.setUserId(BaseContext.getCurrentId());
+            shoppingCart.setCreateTime(LocalDateTime.now());
+            return shoppingCart;
+        }).collect(Collectors.toList());
+
+        shoppingCartMapper.insertBatch(list);
     }
 
 }

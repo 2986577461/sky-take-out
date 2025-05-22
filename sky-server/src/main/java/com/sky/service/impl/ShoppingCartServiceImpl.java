@@ -1,9 +1,11 @@
 package com.sky.service.impl;
 
+import com.sky.constant.MessageConstant;
 import com.sky.context.BaseContext;
 import com.sky.dto.ShoppingCartDTO;
 import com.sky.entity.Dish;
 import com.sky.entity.ShoppingCart;
+import com.sky.exception.ShoppingCartBusinessException;
 import com.sky.mapper.DishMapper;
 import com.sky.mapper.SetmealMapper;
 import com.sky.mapper.ShoppingCartMapper;
@@ -75,17 +77,22 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     @Override
     public void sub(ShoppingCartDTO shoppingCartDTO) {
         ShoppingCart shoppingCart = new ShoppingCart();
-        BeanUtils.copyProperties(shoppingCartDTO, shoppingCart);
         shoppingCart.setUserId(BaseContext.getCurrentId());
 
-        ShoppingCart shoppingCart1 = shoppingCartMapper.list(shoppingCart).get(0);
+        BeanUtils.copyProperties(shoppingCartDTO, shoppingCart);
+        List<ShoppingCart> list = shoppingCartMapper.list(shoppingCart);
+
+        if (list == null && list.size() != 1)
+            throw new ShoppingCartBusinessException(MessageConstant.SHOPPING_CART_IS_NULL);
+
+        ShoppingCart dish = list.get(0);
 
         //如果item不足两条则直接删除，不展示在购物车
-        if (shoppingCart1.getNumber() <= 1) {
+        if (dish.getNumber() <= 1) {
             shoppingCartMapper.delete(shoppingCart);
         } else {
             //大于两条只减少数量即可
-            shoppingCart.setNumber(shoppingCart1.getNumber() - 1);
+            shoppingCart.setNumber(dish.getNumber() - 1);
             shoppingCartMapper.update(shoppingCart);
         }
     }
