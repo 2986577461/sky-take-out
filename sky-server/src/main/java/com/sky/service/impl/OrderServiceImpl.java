@@ -3,14 +3,16 @@ package com.sky.service.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.sky.constant.MessageConstant;
 import com.sky.context.BaseContext;
-import com.sky.dto.OrdersDTO;
+import com.sky.dto.OrdersCancelDTO;
+import com.sky.dto.OrdersConfirmDTO;
+import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.dto.OrdersPaymentDTO;
+import com.sky.dto.OrdersRejectionDTO;
 import com.sky.dto.OrdersSubmitDTO;
 import com.sky.entity.AddressBook;
 import com.sky.entity.OrderDetail;
 import com.sky.entity.Orders;
 import com.sky.entity.ShoppingCart;
-import com.sky.entity.User;
 import com.sky.exception.AddressBookBusinessException;
 import com.sky.exception.OrderBusinessException;
 import com.sky.exception.ShoppingCartBusinessException;
@@ -19,8 +21,10 @@ import com.sky.mapper.OrderDetailMapper;
 import com.sky.mapper.OrderMapper;
 import com.sky.mapper.ShoppingCartMapper;
 import com.sky.mapper.UserMapper;
+import com.sky.result.PageResult;
 import com.sky.service.OrderService;
 import com.sky.vo.OrderPaymentVO;
+import com.sky.vo.OrderStatisticsVO;
 import com.sky.vo.OrderSubmitVO;
 import com.sky.vo.OrderVO;
 import lombok.AllArgsConstructor;
@@ -108,7 +112,6 @@ public class OrderServiceImpl implements OrderService {
     public OrderPaymentVO payment(OrdersPaymentDTO ordersPaymentDTO) throws Exception {
         // 当前登录用户id
         Long userId = BaseContext.getCurrentId();
-        User user = userMapper.getById(userId);
 
 //        //调用微信支付接口，生成预支付交易单
 //        JSONObject jsonObject = weChatPayUtil.pay(
@@ -158,9 +161,9 @@ public class OrderServiceImpl implements OrderService {
     public void paySuccess(String outTradeNo) {
 
         // 根据订单号查询订单
-        OrdersDTO ordersDTO = new OrdersDTO();
-        ordersDTO.setNumber(outTradeNo);
-        Orders ordersDB = orderMapper.query(ordersDTO, 0, 1).get(0);
+        OrdersPageQueryDTO ordersPageQueryDTO = new OrdersPageQueryDTO();
+        ordersPageQueryDTO.setNumber(outTradeNo);
+        Orders ordersDB = orderMapper.pageQuery(ordersPageQueryDTO).get(0);
 
         // 根据订单id更新订单的状态、支付方式、支付状态、结账时间
         Orders orders = Orders.builder()
@@ -177,10 +180,10 @@ public class OrderServiceImpl implements OrderService {
     public List<OrderVO> historyOrders(Integer page, Integer pageSize, Integer status) {
 
         Long id = BaseContext.getCurrentId();
-        OrdersDTO ordersDTO = new OrdersDTO();
-        ordersDTO.setUserId(id);
-        ordersDTO.setStatus(status);
-        List<Orders> list = orderMapper.query(ordersDTO, page - 1, pageSize);
+        OrdersPageQueryDTO ordersPageQueryDTO = new OrdersPageQueryDTO();
+        ordersPageQueryDTO.setUserId(id);
+        ordersPageQueryDTO.setStatus(status);
+        List<Orders> list = orderMapper.pageQuery(ordersPageQueryDTO);
 
         List<OrderVO> orderVOS = new ArrayList<>();
         if (list != null && !list.isEmpty())
@@ -198,7 +201,6 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderVO orderDetail(Long id) {
         Orders orders = orderMapper.getById(id);
-
         if (orders == null)
             throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
 
@@ -252,6 +254,105 @@ public class OrderServiceImpl implements OrderService {
         }).collect(Collectors.toList());
 
         shoppingCartMapper.insertBatch(list);
+    }
+
+    @Override
+    public PageResult canditionSearch(OrdersPageQueryDTO ordersPageQueryDTO) {
+
+        List<Orders> orders = orderMapper.pageQuery(ordersPageQueryDTO);
+        List<OrderVO> list = new ArrayList<>();
+
+        orders.forEach(orders1 -> {
+            OrderVO orderVO = new OrderVO();
+            BeanUtils.copyProperties(orders1, orderVO);
+
+            List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(orders1.getId());
+            orderVO.setOrderDishes(getOrderDishesStr(orderDetailList));
+
+            list.add(orderVO);
+        });
+
+        return new PageResult(list.size(), list);
+    }
+
+    @Override
+    public OrderStatisticsVO getStatistics() {
+
+        Integer toBeConfirmed = orderMapper.countStatus(Orders.TO_BE_CONFIRMED);
+        Integer confirmed = orderMapper.countStatus(Orders.CONFIRMED);
+        Integer deliveryInProgress = orderMapper.countStatus(DELIVERY_IN_PROGRESS);
+
+        OrderStatisticsVO orderStatisticsVO = new OrderStatisticsVO();
+        orderStatisticsVO.setToBeConfirmed(toBeConfirmed);
+        orderStatisticsVO.setConfirmed(confirmed);
+        orderStatisticsVO.setDeliveryInProgress(deliveryInProgress);
+
+        return orderStatisticsVO;
+    }
+
+    @Override
+    public OrderVO details(Long id) {
+        Orders order = orderMapper.getById(id);
+        if (order == null)
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+
+        OrderVO orderVO = new OrderVO();
+        BeanUtils.copyProperties(order, orderVO);
+
+        orderVO.setOrderDetailList(orderDetailMapper.getByOrderId(id));
+
+        return orderVO;
+    }
+
+    @Override
+    public void confirm(OrdersConfirmDTO ordersConfirmDTO) {
+        Orders orders = Orders.builder()
+                .id(ordersConfirmDTO.getId())
+                .status(ordersConfirmDTO.getStatus())
+                .build();
+
+        orderMapper.update(orders);
+    }
+
+    @Override
+    public void rejection(OrdersRejectionDTO ordersRejectionDTO) {
+        Orders order = orderMapper.getById(ordersRejectionDTO.getId());
+        if (order == null || order.getStatus() != Orders.TO_BE_CONFIRMED
+                || order.getPayStatus() != Orders.PAID)
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+
+        Orders freshOrder = new Orders();
+        freshOrder.setId(order.getId());
+        freshOrder.setStatus(Orders.CANCELLED);
+        freshOrder.setPayStatus(Orders.REFUND);
+        freshOrder.setRejectionReason(ordersRejectionDTO.getRejectionReason());
+        freshOrder.setCancelTime(LocalDateTime.now());
+
+        orderMapper.update(freshOrder);
+
+    }
+
+    @Override
+    public void cancel(OrdersCancelDTO ordersCancelDTO) {
+        orderMapper.update(
+                Orders.builder().
+                        id(ordersCancelDTO.getId()).
+                        status(Orders.CANCELLED).
+                        cancelReason(ordersCancelDTO.getCancelReason()).
+                        cancelTime(LocalDateTime.now()).
+                        build());
+    }
+
+    private String getOrderDishesStr(List<OrderDetail> orderDetailList) {
+
+        // 将每一条订单菜品信息拼接为字符串（格式：宫保鸡丁*3；）
+        List<String> orderDishList = orderDetailList.stream().map(x -> {
+            String orderDish = x.getName() + "*" + x.getNumber() + ";";
+            return orderDish;
+        }).collect(Collectors.toList());
+
+        // 将该订单对应的所有菜品信息拼接在一起
+        return String.join("", orderDishList);
     }
 
 }
