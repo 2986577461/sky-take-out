@@ -1,0 +1,6 @@
+**/target/
+./src/test
+./gitignore
+.idea
+*.iml
+docker-compose.yml

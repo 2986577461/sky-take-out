@@ -1,0 +1,73 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://47.108.61.239:3306/group-work
+    username: root
+    password: jycv587.
+    type: com.alibaba.druid.pool.DruidDataSource # 指定数据源类型为 Druid
+  mail:
+    host: smtp.qq.com
+    port: 587
+    username: 2986577461@qq.com
+    password: azchxfvyivxtdgbe  # QQ邮箱需用授权码（非登录密码）
+    properties:
+      mail:
+        smtp:
+          starttls.enable: true
+          auth: true
+  servlet:
+    multipart:
+      max-file-size: 5MB       # 单文件最大尺寸
+      max-request-size: 10MB   # 请求总最大尺寸
+  profiles:
+    active: dev
+  data:
+    redis:
+      password: jycv587.
+      host: redis
+
+
+xiaoyan:
+  jwt:
+    token-name: authorization
+    ttl: 7200000000
+    secret-key: xiaoyao
+
+front-location:
+  request-api: http://localhost, http://localhost:3000
+
+server:
+  address: 0.0.0.0
+  forward-headers-strategy: native
+
+deepseek:
+  base-url: "https://api.deepseek.com/v1/chat/completions"
+  api-key: "sk-3b47fc327129460b8c1771428c241911"
+
+#注意，url前必须+/
+admit:
+  url: /users/login,
+    /users/register,
+    /email/**,
+    /v3/api-docs/**,
+    /bus/**,
+    /weather/**
+
+
+smart-city:
+  bus-api: https://api.lolimi.cn/API/che/api.php
+  site: 师范学院,芙蓉市场,芙蓉小区中段,实验高中,凉水井,富乐汽车站
+  weather:
+    province: 四川
+    city: 绵阳
+    county: 游仙
+
+springdoc:
+  swagger-ui:
+    enabled: true
+    configUrl: /v3/api-docs/swagger-config # group-work 项目的配置
+    urls:
+      - url: /v3/api-docs # group-work 项目的配置
+        name: 小组作业 API 文档
+  api-docs:
+    path: /v3/api-docs
